@@ -72,30 +72,28 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
             <rect x="50" y="28" width="20" height="3" rx="1.5" fill="rgba(10,22,40,0.15)" />
           </svg>
 
-          {/* Graph line rising */}
+          {/* Graph arrow crossing through the pig */}
           <svg
-            className="absolute left-2 bottom-6 transition-all duration-700 ease-out"
-            viewBox="0 0 80 60"
-            width="80"
-            height="60"
+            className="absolute inset-0 w-full h-full transition-all duration-700 ease-out"
+            viewBox="0 0 260 200"
             style={{
               opacity: phase >= 2 ? 1 : 0,
             }}
           >
             <path
-              d="M 5 55 Q 15 50 25 42 Q 35 34 45 28 Q 55 22 65 12 L 75 5"
+              d="M 10 170 Q 50 155 90 130 Q 130 100 170 70 Q 200 48 240 20"
               fill="none"
-              stroke="rgba(74,222,128,0.7)"
-              strokeWidth="2.5"
+              stroke="rgba(74,222,128,0.8)"
+              strokeWidth="5"
               strokeLinecap="round"
-              strokeDasharray="120"
-              strokeDashoffset={phase >= 2 ? '0' : '120'}
+              strokeDasharray="350"
+              strokeDashoffset={phase >= 2 ? '0' : '350'}
               style={{ transition: 'stroke-dashoffset 0.8s ease-out' }}
             />
             {/* Arrow tip */}
             <polygon
-              points="72,8 78,4 74,12"
-              fill="rgba(74,222,128,0.7)"
+              points="234,28 245,16 240,32"
+              fill="rgba(74,222,128,0.8)"
               style={{
                 opacity: phase >= 2 ? 1 : 0,
                 transition: 'opacity 0.3s ease-out 0.7s',
@@ -137,7 +135,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
           }}
         >
           <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'rgba(255,255,255,0.95)' }}>
-            FinançasPRO
+            Controle$
           </h1>
           <p className="mt-2 text-sm tracking-wide" style={{ color: 'rgba(74,222,128,0.8)' }}>
             Contas, gastos e investimentos
