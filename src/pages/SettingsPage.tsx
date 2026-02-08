@@ -137,7 +137,7 @@ export default function SettingsPage() {
 
   return (
     <PageContainer
-      header={<h1 className="text-2xl font-bold">Configurações</h1>}
+      header={<h1 className="text-2xl font-bold page-title">Configurações</h1>}
     >
       <ScrollArea className="h-[calc(100vh-140px)]">
         <div className="space-y-6 pb-4">

@@ -66,7 +66,7 @@ export default function DashboardPage() {
     <PageContainer
       header={
         <div className="space-y-4">
-          <h1 className="text-2xl font-bold">Relatório</h1>
+          <h1 className="text-2xl font-bold page-title">Relatório</h1>
           <MonthSelector month={month} onMonthChange={setMonth} />
         </div>
       }

@@ -164,6 +164,13 @@
     }
   }
 
+  /* Page title font */
+  .page-title {
+    font-family: 'Lucida Handwriting', 'Lucida Calligraphy', cursive;
+    font-style: italic;
+    font-weight: bold;
+  }
+
   /* Tap highlight removal for mobile */
   .tap-highlight-none {
     -webkit-tap-highlight-color: transparent;
