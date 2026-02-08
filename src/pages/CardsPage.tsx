@@ -88,7 +88,7 @@ export default function CardsPage() {
     <PageContainer
       header={
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold page-title">Cartões</h1>
+          <h1 className="text-5xl font-bold page-title">Cartões</h1>
           <Button onClick={() => setShowAddSheet(true)} size="sm">
             <Plus className="h-4 w-4 mr-1" />
             Novo
