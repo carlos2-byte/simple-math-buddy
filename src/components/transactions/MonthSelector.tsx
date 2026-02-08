@@ -92,7 +92,7 @@ export function MonthSelector({ month, onMonthChange }: MonthSelectorProps) {
           className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-muted transition-colors"
         >
           <Calendar className="h-4 w-4 text-muted-foreground" />
-          <span className="text-lg font-semibold capitalize">
+          <span className="text-lg font-semibold capitalize page-title">
             {formatMonthYear(month)}
           </span>
           {!isCurrentMonth && (
