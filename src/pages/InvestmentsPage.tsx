@@ -217,7 +217,7 @@ export default function InvestmentsPage() {
     <PageContainer
       header={
         <div className="flex items-center justify-between">
-          <h1 className="text-5xl font-bold page-title">Investimentos</h1>
+          <h1 className="text-2xl font-bold">Investimentos</h1>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={() => setShowRateSheet(true)}>
               <Percent className="h-4 w-4" />
