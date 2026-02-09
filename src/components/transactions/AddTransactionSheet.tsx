@@ -88,7 +88,9 @@ export function AddTransactionSheet({
         setCategory('other');
         setDate(getLocalDateString());
         setPaymentMethod('cash');
-        setCardId('');
+        // Auto-select default card
+        const defaultCard = cards.find(c => c.isDefault === true);
+        setCardId(defaultCard ? defaultCard.id : '');
         setInstallments(undefined);
         setIsInstallmentTotal(true);
         setIsRecurring(false);
@@ -96,7 +98,7 @@ export function AddTransactionSheet({
         setRecurrenceEndDate('');
       }
     }
-  }, [open, editingTransaction]);
+  }, [open, editingTransaction, cards]);
 
   // No longer auto-set end date for recurrence - it will be indefinite
 

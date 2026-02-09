@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select,
   SelectContent,
@@ -29,6 +30,7 @@ export function EditCardSheet({ open, onOpenChange, card, cards = [], onSubmit }
   const [dueDay, setDueDay] = useState('5');
   const [canPayOtherCards, setCanPayOtherCards] = useState(true);
   const [defaultPayerCardId, setDefaultPayerCardId] = useState<string>('');
+  const [isDefault, setIsDefault] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Filter available payer cards (exclude current card and cards that cannot pay other cards)
@@ -45,6 +47,7 @@ export function EditCardSheet({ open, onOpenChange, card, cards = [], onSubmit }
       setDueDay(card.dueDay?.toString() || '5');
       setCanPayOtherCards(card.canPayOtherCards !== false);
       setDefaultPayerCardId(card.defaultPayerCardId || '');
+      setIsDefault(card.isDefault === true);
     }
   }, [card, open]);
 
@@ -63,6 +66,7 @@ export function EditCardSheet({ open, onOpenChange, card, cards = [], onSubmit }
         dueDay: parseInt(dueDay),
         canPayOtherCards,
         defaultPayerCardId: defaultPayerCardId || undefined,
+        isDefault: isDefault || undefined,
       });
       onOpenChange(false);
     } finally {
@@ -144,6 +148,18 @@ export function EditCardSheet({ open, onOpenChange, card, cards = [], onSubmit }
               checked={canPayOtherCards} 
               onCheckedChange={setCanPayOtherCards}
             />
+          </div>
+
+          {/* Cartão Padrão */}
+          <div className="flex items-center space-x-2 p-3 border rounded-lg bg-muted/20">
+            <Checkbox
+              id="editIsDefault"
+              checked={isDefault}
+              onCheckedChange={(checked) => setIsDefault(checked === true)}
+            />
+            <Label htmlFor="editIsDefault" className="font-normal cursor-pointer">
+              Cartão padrão (será selecionado automaticamente nas despesas)
+            </Label>
           </div>
 
           {/* Default Payer Card Selection */}

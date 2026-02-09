@@ -42,6 +42,7 @@ export interface CreditCard {
   dueDay?: number;
   canPayOtherCards?: boolean; // If this card can be used to pay other cards' invoices
   defaultPayerCardId?: string; // Which card pays this card's invoice by default
+  isDefault?: boolean; // Only one card can be default at a time
 }
 
 export interface AppSettings {
@@ -103,12 +104,25 @@ export async function getCreditCardById(id: string): Promise<CreditCard | undefi
 
 export async function addCreditCard(card: CreditCard): Promise<void> {
   const cards = await getCreditCards();
+  // If new card is default, unmark all others
+  if (card.isDefault) {
+    cards.forEach(c => c.isDefault = false);
+  }
   cards.push(card);
   await defaultAdapter.setItem(CARDS_KEY, cards);
 }
 
+export async function getDefaultCreditCard(): Promise<CreditCard | undefined> {
+  const cards = await getCreditCards();
+  return cards.find(c => c.isDefault === true);
+}
+
 export async function updateCreditCard(card: CreditCard): Promise<void> {
   const cards = await getCreditCards();
+  // If this card is being set as default, unmark all others
+  if (card.isDefault) {
+    cards.forEach(c => c.isDefault = false);
+  }
   const index = cards.findIndex(c => c.id === card.id);
   if (index !== -1) {
     cards[index] = card;
@@ -364,6 +378,7 @@ export async function clearAllData(): Promise<void> {
 export default {
   getCreditCards,
   getCreditCardById,
+  getDefaultCreditCard,
   addCreditCard,
   updateCreditCard,
   deleteCreditCard,

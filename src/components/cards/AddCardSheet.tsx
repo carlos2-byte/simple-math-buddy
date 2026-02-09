@@ -3,6 +3,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select,
   SelectContent,
@@ -26,6 +27,7 @@ export function AddCardSheet({ open, onOpenChange, cards = [], onSubmit }: AddCa
   const [closingDay, setClosingDay] = useState('25');
   const [dueDay, setDueDay] = useState('5');
   const [defaultPayerCardId, setDefaultPayerCardId] = useState<string>('');
+  const [isDefault, setIsDefault] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Filter available payer cards (cards that can pay other cards)
@@ -38,6 +40,7 @@ export function AddCardSheet({ open, onOpenChange, cards = [], onSubmit }: AddCa
     setClosingDay('25');
     setDueDay('5');
     setDefaultPayerCardId('');
+    setIsDefault(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -53,6 +56,7 @@ export function AddCardSheet({ open, onOpenChange, cards = [], onSubmit }: AddCa
         closingDay: parseInt(closingDay),
         dueDay: parseInt(dueDay),
         defaultPayerCardId: defaultPayerCardId || undefined,
+        isDefault: isDefault || undefined,
       });
       resetForm();
       onOpenChange(false);
@@ -124,31 +128,22 @@ export function AddCardSheet({ open, onOpenChange, cards = [], onSubmit }: AddCa
             </div>
           </div>
 
+          {/* Cartão Padrão */}
+          <div className="flex items-center space-x-2 p-3 border rounded-lg bg-muted/20">
+            <Checkbox
+              id="isDefault"
+              checked={isDefault}
+              onCheckedChange={(checked) => setIsDefault(checked === true)}
+            />
+            <Label htmlFor="isDefault" className="font-normal cursor-pointer">
+              Cartão padrão (será selecionado automaticamente nas despesas)
+            </Label>
+          </div>
+
           {/* Default Payer Card Selection */}
           {availablePayerCards.length > 0 && (
             <div className="space-y-2 p-4 bg-muted/30 rounded-lg">
-              <Label>Pagar fatura com outro cartão</Label>
-              <p className="text-xs text-muted-foreground mb-2">
-                Selecione qual cartão será usado para pagar a fatura deste cartão
-              </p>
-              <Select value={defaultPayerCardId || 'none'} onValueChange={(val) => setDefaultPayerCardId(val === 'none' ? '' : val)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Nenhum (pagar manualmente)" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Nenhum (pagar manualmente)</SelectItem>
-                  {availablePayerCards.map(c => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.name} {c.last4 ? `(•••• ${c.last4})` : ''}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {defaultPayerCardId && (
-                <p className="text-xs text-primary mt-2">
-                  ✓ A fatura será lançada automaticamente no cartão selecionado
-                </p>
-              )}
+...
             </div>
           )}
 
