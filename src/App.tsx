@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { LockScreen } from "@/components/security/LockScreen";
 import { SplashScreen } from "@/components/SplashScreen";
+import preSplashImg from "@/assets/Fundo.png";
 import { useAppLock } from "@/hooks/useAppLock";
 import { generateAutoCardPayments } from "@/lib/autoCardPayment";
 import HomePage from "./pages/HomePage";
@@ -23,7 +24,8 @@ function AppContent() {
   const { hasPassword, loading } = useAppLock();
   const [unlocked, setUnlocked] = useState(false);
   const [initialCheckDone, setInitialCheckDone] = useState(false);
-  const [showSplash, setShowSplash] = useState(true);
+  const [showPreSplash, setShowPreSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(false);
 
   // Only check lock status on initial load
   useEffect(() => {
@@ -42,7 +44,25 @@ function AppContent() {
     generateAutoCardPayments();
   }, []);
 
-  // Show splash screen first
+  // Show pre-splash image, then splash video
+  if (showPreSplash) {
+    return (
+      <div className="fixed inset-0 z-50 bg-black">
+        <img
+          src={preSplashImg}
+          alt=""
+          className="w-full h-full object-cover"
+          onLoad={() => {
+            setTimeout(() => {
+              setShowPreSplash(false);
+              setShowSplash(true);
+            }, 100);
+          }}
+        />
+      </div>
+    );
+  }
+
   if (showSplash) {
     return <SplashScreen onComplete={() => setShowSplash(false)} />;
   }
