@@ -1,30 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Base application theme. -->
+    <!-- Base application theme -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <!-- Tema principal sem ActionBar -->
     <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar">
+
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-        <item name="android:background">@null</item>
+
+        <!-- REMOVE o @null (isso causava o branco) -->
+        <item name="android:windowBackground">@color/splash_background</item>
+
+        <!-- Garante que status/navigation não pisquem -->
+        <item name="android:statusBarColor">@color/splash_background</item>
+        <item name="android:navigationBarColor">@color/splash_background</item>
+
     </style>
 
-    <!-- Splash de lançamento (Android 12+) -->
+    <!-- Tema de lançamento (Android 12+) -->
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
-        <!-- Cor de fundo do splash -->
-        <item name="android:windowSplashScreenBackground">@color/black</item>
 
-        <!-- Ícone/imagem central -->
-        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash</item>
+        <!-- Fundo usado imediatamente pelo sistema -->
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+
+        <!-- Remove COMPLETAMENTE o ícone central -->
+        <item name="windowSplashScreenAnimatedIcon">@null</item>
+        <item name="windowSplashScreenIconBackgroundColor">@null</item>
+
+        <!-- Fundo real da janela -->
+        <item name="android:windowBackground">@color/splash_background</item>
 
         <!-- Tema aplicado após o splash -->
         <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
+
     </style>
 
 </resources>
