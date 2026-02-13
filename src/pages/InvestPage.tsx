@@ -33,7 +33,7 @@ import { useInvestments, useInvestmentDetails } from '@/hooks/useInvestments';
 import { useTransactions } from '@/hooks/useTransactions';
 import { formatCurrency, getCurrentMonth } from '@/lib/formatters';
 import { formatDateBR } from '@/lib/dateUtils';
-import { Investment, getMonthlyYieldEstimate, getInvestmentTaxInfo } from '@/lib/investments';
+import { Investment, getMonthlyYieldEstimate, getDailyYieldEstimate, getInvestmentTaxInfo } from '@/lib/investments';
 import { toast } from '@/hooks/use-toast';
 
 export default function InvestmentsPage() {
@@ -211,6 +211,10 @@ export default function InvestmentsPage() {
   };
 
   // Calculate totals for display
+  const totalDailyYield = investments
+    .filter(i => i.isActive)
+    .reduce((sum, inv) => sum + getDailyYieldEstimate(inv.currentAmount, inv.yieldRate, inv.cdiBonusPercent).gross, 0);
+
   const totalMonthlyYield = investments
     .filter(i => i.isActive)
     .reduce((sum, inv) => sum + getMonthlyYieldEstimate(inv.currentAmount, inv.yieldRate, inv.cdiBonusPercent).gross, 0);
@@ -253,22 +257,28 @@ export default function InvestmentsPage() {
                 </p>
               </div>
             </div>
-            <div className="mt-4 grid grid-cols-2 gap-4 pt-4 border-t border-primary/20">
+            <div className="mt-4 grid grid-cols-3 gap-3 pt-4 border-t border-primary/20">
               <div>
-                <p className="text-xs text-muted-foreground">Rendimento Mensal (est.)</p>
-                <p className="font-semibold text-success tabular-nums">
+                <p className="text-[10px] text-muted-foreground">Rend. Dia</p>
+                <p className="text-xs font-semibold text-success tabular-nums">
+                  +{formatCurrency(totalDailyYield)}
+                </p>
+              </div>
+              <div>
+                <p className="text-[10px] text-muted-foreground">Rend. Mês</p>
+                <p className="text-xs font-semibold text-success tabular-nums">
                   +{formatCurrency(totalMonthlyYield)}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">IR estimado (mensal)</p>
+                <p className="text-[10px] text-muted-foreground">IR est. (mês)</p>
                 <p className="text-[11px] font-medium text-muted-foreground tabular-nums">
                   -{formatCurrency(totalMonthlyTax)}
                 </p>
               </div>
             </div>
-            <p className="text-[11px] text-muted-foreground mt-2">
-              Taxa padrão: {defaultRate}% a.a. • IR: tabela regressiva (15% a 22,5%)
+            <p className="text-[10px] text-muted-foreground mt-2">
+              Taxa padrão: {defaultRate}% a.a. • IR: tab. reg. p/ IR (15% a 22,5%)
             </p>
           </CardContent>
         </Card>
@@ -361,16 +371,22 @@ export default function InvestmentsPage() {
                       </div>
 
                       {/* Yield Estimates */}
-                      <div className="grid grid-cols-2 gap-2 mb-3 p-2 bg-muted/30 rounded-lg">
+                      <div className="grid grid-cols-3 gap-2 mb-3 p-2 bg-muted/30 rounded-lg">
                         <div>
-                          <p className="text-xs text-muted-foreground">Rend. mensal (est.)</p>
-                          <p className="text-sm font-medium text-success tabular-nums">
+                          <p className="text-[10px] text-muted-foreground">Rend. Dia</p>
+                          <p className="text-xs font-medium text-success tabular-nums">
+                            +{formatCurrency(getDailyYieldEstimate(inv.currentAmount, inv.yieldRate, inv.cdiBonusPercent).gross)}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-muted-foreground">Rend. Mês</p>
+                          <p className="text-xs font-medium text-success tabular-nums">
                             +{formatCurrency(monthlyYield.gross)}
                           </p>
                         </div>
                         <div>
                           <div className="flex items-center gap-1">
-                            <p className="text-xs text-muted-foreground">IR estimado</p>
+                            <p className="text-[10px] text-muted-foreground">IR est.</p>
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger>
@@ -383,7 +399,7 @@ export default function InvestmentsPage() {
                               </Tooltip>
                             </TooltipProvider>
                           </div>
-                          <p className="text-[11px] text-muted-foreground tabular-nums">
+                          <p className="text-[10px] text-muted-foreground tabular-nums">
                             -{formatCurrency(monthlyYield.gross * taxInfo.weightedRate)} ({taxInfo.rateLabel})
                           </p>
                         </div>
