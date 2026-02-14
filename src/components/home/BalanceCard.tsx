@@ -36,7 +36,10 @@ export function BalanceCard({
   onToggleBalanceYield,
 }: BalanceCardProps) {
   const hasFutureExpenses = projectedExpenses > 0;
-  const effectiveRate = balanceYieldRate + (balanceExtraYieldEnabled ? balanceExtraYieldPercent : 0);
+  // Use multiplicative formula: rate * (bonusPercent / 100), same as investments
+  const effectiveRate = balanceExtraYieldEnabled && balanceExtraYieldPercent > 0
+    ? balanceYieldRate * (balanceExtraYieldPercent / 100)
+    : balanceYieldRate;
   
   return (
     <Card className="bg-gradient-to-br from-primary/20 to-accent/10 border-primary/20">
@@ -97,7 +100,7 @@ export function BalanceCard({
                 </div>
               )}
               <p className="text-[10px] text-muted-foreground text-center">
-                Saldo rendendo a {effectiveRate}% a.a.{balanceExtraYieldEnabled && balanceExtraYieldPercent > 0 ? ` (${balanceYieldRate}% + ${balanceExtraYieldPercent}% extra)` : ''} • Imposto {balanceYieldTaxMode === 'daily' ? 'descontado diariamente' : 'descontado apenas no saque'}
+                Saldo rendendo a {effectiveRate.toFixed(2)}% a.a.{balanceExtraYieldEnabled && balanceExtraYieldPercent > 0 ? ` (${balanceYieldRate}% × ${balanceExtraYieldPercent}%)` : ''} • Imposto {balanceYieldTaxMode === 'daily' ? 'descontado diariamente' : 'descontado apenas no saque'}
               </p>
             </div>
           )}

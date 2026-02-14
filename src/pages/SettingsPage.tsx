@@ -302,7 +302,7 @@ export default function SettingsPage() {
 
                   {settings.balanceExtraYieldEnabled && (
                     <div className="space-y-2">
-                      <Label>Percentual extra (% ao ano)</Label>
+                      <Label>Percentual do CDI (%)</Label>
                       <Input
                         type="text"
                         inputMode="decimal"
@@ -314,10 +314,10 @@ export default function SettingsPage() {
                             updateSettings({ balanceExtraYieldPercent: raw === '' ? 0 : isNaN(val) ? 0 : val });
                           }
                         }}
-                        placeholder="Ex: 2.5"
+                        placeholder="Ex: 105"
                       />
                       <p className="text-xs text-muted-foreground">
-                        Será somado à taxa principal. Total: {((settings.balanceYieldRate ?? 0) + (settings.balanceExtraYieldPercent ?? 0)).toFixed(2)}% a.a.
+                        Taxa final: {((settings.balanceYieldRate ?? 0) * ((settings.balanceExtraYieldPercent ?? 100) / 100)).toFixed(2)}% a.a. ({settings.balanceYieldRate ?? 0}% × {settings.balanceExtraYieldPercent ?? 100}%)
                       </p>
                     </div>
                   )}

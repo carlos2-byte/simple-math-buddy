@@ -72,15 +72,22 @@ export async function calculateRealTimeBalances(
   const currentBalance = totalIncome - pastExpenses;
   
   // Calculate daily yield based on current balance using settings rate
+  // Uses the same multiplicative formula as investments: rate * (bonusPercent / 100)
   let dailyYield = 0;
   if (currentBalance > 0) {
     const settings = await getSettings();
     if (settings.balanceYieldEnabled && settings.balanceYieldRate) {
-      let effectiveRate = settings.balanceYieldRate;
-      if (settings.balanceExtraYieldEnabled && settings.balanceExtraYieldPercent) {
-        effectiveRate += settings.balanceExtraYieldPercent;
+      const cdiBonusPercent = settings.balanceExtraYieldEnabled ? settings.balanceExtraYieldPercent : undefined;
+      const grossYield = calculateDailyYield(currentBalance, settings.balanceYieldRate, cdiBonusPercent);
+      
+      // Apply tax if daily mode (same logic as investments)
+      if (settings.balanceYieldTaxMode === 'daily' && grossYield > 0) {
+        // Use 180 days as default bracket for balance (conservative)
+        const taxRate = 0.225; // 22.5% for up to 180 days
+        dailyYield = grossYield * (1 - taxRate);
+      } else {
+        dailyYield = grossYield;
       }
-      dailyYield = calculateDailyYield(currentBalance, effectiveRate);
     }
   }
   
@@ -139,11 +146,15 @@ export async function calculateProjectedBalance(
   if (currentBalance > 0) {
     const settings = await getSettings();
     if (settings.balanceYieldEnabled && settings.balanceYieldRate) {
-      let effectiveRate = settings.balanceYieldRate;
-      if (settings.balanceExtraYieldEnabled && settings.balanceExtraYieldPercent) {
-        effectiveRate += settings.balanceExtraYieldPercent;
+      const cdiBonusPercent = settings.balanceExtraYieldEnabled ? settings.balanceExtraYieldPercent : undefined;
+      const grossYield = calculateDailyYield(currentBalance, settings.balanceYieldRate, cdiBonusPercent);
+      
+      if (settings.balanceYieldTaxMode === 'daily' && grossYield > 0) {
+        const taxRate = 0.225;
+        dailyYield = grossYield * (1 - taxRate);
+      } else {
+        dailyYield = grossYield;
       }
-      dailyYield = calculateDailyYield(currentBalance, effectiveRate);
     }
   }
   
@@ -197,10 +208,7 @@ export async function calculateAccumulatedYield(month: string): Promise<number> 
     return 0;
   }
   
-  let effectiveRate = settings.balanceYieldRate;
-  if (settings.balanceExtraYieldEnabled && settings.balanceExtraYieldPercent) {
-    effectiveRate += settings.balanceExtraYieldPercent;
-  }
+  const cdiBonusPercent = settings.balanceExtraYieldEnabled ? settings.balanceExtraYieldPercent : undefined;
   
   // Determine the range of dates to calculate
   const monthStart = `${month}-01`;
@@ -230,8 +238,15 @@ export async function calculateAccumulatedYield(month: string): Promise<number> 
     }
     
     if (balance > 0) {
-      const grossYield = calculateDailyYield(balance, effectiveRate);
-      totalYield += grossYield;
+      const grossYield = calculateDailyYield(balance, settings.balanceYieldRate, cdiBonusPercent);
+      
+      // Apply tax if daily mode
+      if (settings.balanceYieldTaxMode === 'daily' && grossYield > 0) {
+        const taxRate = 0.225;
+        totalYield += grossYield * (1 - taxRate);
+      } else {
+        totalYield += grossYield;
+      }
     }
     
     currentDate = addDaysToDate(currentDate, 1);
