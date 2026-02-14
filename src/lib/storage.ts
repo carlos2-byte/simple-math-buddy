@@ -347,19 +347,29 @@ const INVESTMENTS_KEY = 'investments';
 const DEFAULT_YIELD_KEY = 'default_yield_rate';
 const YIELD_HISTORY_KEY = 'yield_history';
 const LAST_YIELD_PROCESS_KEY = 'last_yield_process_date';
+const PAYMENT_STATUS_KEY = 'payment_status';
+const COVERAGE_RECORDS_KEY = 'investment_coverage_records';
+const PENDING_TRANSFER_KEY = 'pending_balance_transfer';
+const TRANSFER_HISTORY_KEY = 'balance_transfer_history';
+const ORIGINAL_LIMITS_KEY = 'original_card_limits';
 
 // Export/Import
 export async function exportAllData(includeInvestments: boolean = true): Promise<string> {
-  const [transactions, cards, settings, securityConfig, customCategories] = await Promise.all([
+  const [transactions, cards, settings, securityConfig, customCategories, paymentStatus, coverageRecords, pendingTransfer, transferHistory, originalLimits] = await Promise.all([
     listTransactionObjects(),
     getCreditCards(),
     getSettings(),
     defaultAdapter.getItem<{ passwordHash?: string } | null>('app_password', null),
     getCustomCategories(),
+    defaultAdapter.getItem(PAYMENT_STATUS_KEY, {}),
+    defaultAdapter.getItem(COVERAGE_RECORDS_KEY, []),
+    defaultAdapter.getItem(PENDING_TRANSFER_KEY, null),
+    defaultAdapter.getItem(TRANSFER_HISTORY_KEY, []),
+    defaultAdapter.getItem(ORIGINAL_LIMITS_KEY, null),
   ]);
   
   const data: Record<string, unknown> = {
-    version: 2,
+    version: 3,
     exportedAt: new Date().toISOString(),
     transactions,
     creditCards: cards,
@@ -367,6 +377,11 @@ export async function exportAllData(includeInvestments: boolean = true): Promise
     includesInvestments: includeInvestments,
     passwordHash: securityConfig?.passwordHash || null,
     customCategories,
+    paymentStatus,
+    coverageRecords,
+    pendingTransfer,
+    transferHistory,
+    originalLimits,
   };
   
   if (includeInvestments) {
@@ -414,6 +429,23 @@ export async function importAllData(jsonString: string): Promise<void> {
   }
   if (data.lastYieldProcessDate !== undefined) {
     await defaultAdapter.setItem(LAST_YIELD_PROCESS_KEY, data.lastYieldProcessDate);
+  }
+  
+  // Import additional app state
+  if (data.paymentStatus !== undefined) {
+    await defaultAdapter.setItem(PAYMENT_STATUS_KEY, data.paymentStatus);
+  }
+  if (data.coverageRecords !== undefined) {
+    await defaultAdapter.setItem(COVERAGE_RECORDS_KEY, data.coverageRecords);
+  }
+  if (data.pendingTransfer !== undefined) {
+    await defaultAdapter.setItem(PENDING_TRANSFER_KEY, data.pendingTransfer);
+  }
+  if (data.transferHistory !== undefined) {
+    await defaultAdapter.setItem(TRANSFER_HISTORY_KEY, data.transferHistory);
+  }
+  if (data.originalLimits !== undefined) {
+    await defaultAdapter.setItem(ORIGINAL_LIMITS_KEY, data.originalLimits);
   }
 }
 
