@@ -62,7 +62,7 @@ export interface Investment {
   isActive: boolean;
   createdAt: string;
   canCoverNegativeBalance?: boolean;
-  taxMode?: 'daily' | 'on_withdrawal'; // UI-only: how tax is displayed/described
+  taxMode?: 'daily' | 'on_withdrawal'; // 'daily' = IR deducted each day; 'on_withdrawal' = IR only at withdrawal
   yieldRateHistory?: YieldRateChange[];
   deposits?: DepositRecord[];
 }
@@ -443,17 +443,28 @@ export async function processDailyYields(): Promise<number> {
         const yieldRate = getYieldRateForDate(currentDate);
         const grossYield = calculateDailyYield(currentBalance, yieldRate, investment.cdiBonusPercent);
 
-        // Distribute yield across deposits proportionally
-        if (currentBalance > 0 && grossYield > 0) {
+        const isDailyTax = investment.taxMode === 'daily';
+        let taxAmount = 0;
+        let netYield = grossYield;
+
+        if (isDailyTax && grossYield > 0) {
+          const daysSinceStart = daysBetween(investment.startDate, currentDate);
+          const taxRate = getIRTaxRate(daysSinceStart);
+          taxAmount = grossYield * taxRate;
+          netYield = grossYield - taxAmount;
+        }
+
+        // Distribute net yield across deposits proportionally
+        if (currentBalance > 0 && netYield > 0) {
           for (const dep of investment.deposits) {
             const depTotal = dep.amount + dep.accumulatedYield;
             const share = depTotal / currentBalance;
-            dep.accumulatedYield += grossYield * share;
+            dep.accumulatedYield += netYield * share;
           }
         }
 
         const balanceBefore = currentBalance;
-        currentBalance += grossYield;
+        currentBalance += netYield;
 
         const yieldRecord: YieldHistory = {
           id: generateId(),
@@ -461,14 +472,14 @@ export async function processDailyYields(): Promise<number> {
           date: currentDate,
           appliedDate: addDaysToDate(currentDate, 1),
           grossAmount: grossYield,
-          taxAmount: 0, // Tax only on withdrawal
-          netAmount: grossYield,
+          taxAmount,
+          netAmount: netYield,
           balanceBefore,
           balanceAfter: currentBalance,
         };
 
         history.push(yieldRecord);
-        totalYieldAdded += grossYield;
+        totalYieldAdded += netYield;
       } else {
         const existingRecord = history.find(
           h => h.investmentId === investment.id && h.date === currentDate
@@ -518,17 +529,25 @@ export async function getTotalInvested(): Promise<number> {
 /**
  * Get daily yield estimate (gross, no tax deducted)
  */
-export function getDailyYieldEstimate(amount: number, annualRate: number, cdiBonusPercent?: number): { gross: number; net: number } {
+export function getDailyYieldEstimate(amount: number, annualRate: number, cdiBonusPercent?: number, daysSinceStart?: number, taxMode?: 'daily' | 'on_withdrawal'): { gross: number; net: number } {
   const gross = calculateDailyYield(amount, annualRate, cdiBonusPercent);
+  if (taxMode === 'daily' && daysSinceStart !== undefined) {
+    const taxRate = getIRTaxRate(daysSinceStart);
+    return { gross, net: gross * (1 - taxRate) };
+  }
   return { gross, net: gross };
 }
 
 /**
- * Get monthly yield estimate (~21 business days, gross)
+ * Get monthly yield estimate (~21 business days)
  */
-export function getMonthlyYieldEstimate(amount: number, annualRate: number, cdiBonusPercent?: number): { gross: number; net: number } {
+export function getMonthlyYieldEstimate(amount: number, annualRate: number, cdiBonusPercent?: number, daysSinceStart?: number, taxMode?: 'daily' | 'on_withdrawal'): { gross: number; net: number } {
   const dailyGross = calculateDailyYield(amount, annualRate, cdiBonusPercent);
   const gross = dailyGross * 21;
+  if (taxMode === 'daily' && daysSinceStart !== undefined) {
+    const taxRate = getIRTaxRate(daysSinceStart);
+    return { gross, net: gross * (1 - taxRate) };
+  }
   return { gross, net: gross };
 }
 
@@ -595,6 +614,8 @@ export async function withdrawFromInvestment(
   let remainingWithdraw = amount;
   let totalTax = 0;
 
+  const skipTaxOnWithdraw = investment.taxMode === 'daily';
+
   for (const dep of sortedDeposits) {
     if (remainingWithdraw <= 0) break;
 
@@ -607,11 +628,13 @@ export async function withdrawFromInvestment(
     const yieldPortion = depTotal > 0 ? (dep.accumulatedYield / depTotal) * withdrawFromDep : 0;
     const principalPortion = withdrawFromDep - yieldPortion;
 
-    // Tax only on yield portion, based on deposit age
-    const days = daysBetween(dep.date, today);
-    const taxRate = getIRTaxRate(days);
-    const tax = yieldPortion * taxRate;
-    totalTax += tax;
+    // Tax only on yield portion, based on deposit age (skip if daily mode - already deducted)
+    if (!skipTaxOnWithdraw) {
+      const days = daysBetween(dep.date, today);
+      const taxRate = getIRTaxRate(days);
+      const tax = yieldPortion * taxRate;
+      totalTax += tax;
+    }
 
     // Deduct from deposit
     dep.amount -= principalPortion;
