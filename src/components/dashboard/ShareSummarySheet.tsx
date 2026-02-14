@@ -11,6 +11,7 @@ import { toast } from '@/hooks/use-toast';
 import { FinancialSummaryPDF } from './FinancialSummaryPDF';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { StatementItem } from '@/hooks/useStatement';
 
 interface CategoryItem {
   id: string;
@@ -28,6 +29,8 @@ interface ShareSummarySheetProps {
   currentBalance: number;
   futureCoverage: number;
   categoryData: CategoryItem[];
+  totalInvested: number;
+  statementItems: StatementItem[];
 }
 
 export function ShareSummarySheet({
@@ -39,6 +42,8 @@ export function ShareSummarySheet({
   currentBalance,
   futureCoverage,
   categoryData,
+  totalInvested,
+  statementItems,
 }: ShareSummarySheetProps) {
   const summaryRef = useRef<HTMLDivElement>(null);
   const [generating, setGenerating] = useState<'pdf' | 'image' | null>(null);
@@ -148,6 +153,8 @@ export function ShareSummarySheet({
               currentBalance={currentBalance}
               futureCoverage={futureCoverage}
               categoryData={categoryData}
+              totalInvested={totalInvested}
+              statementItems={statementItems}
             />
           </div>
         </div>
