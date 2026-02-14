@@ -8,6 +8,8 @@ export function useSettings() {
     currencySymbol: 'R$',
     locale: 'pt-BR',
     balanceYieldEnabled: false,
+    balanceYieldRate: 6.5,
+    balanceYieldTaxMode: 'on_withdrawal',
   });
   const [loading, setLoading] = useState(true);
 

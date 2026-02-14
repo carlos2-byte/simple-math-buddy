@@ -180,7 +180,7 @@ export default function InvestmentsPage() {
     setIsSubmitting(true);
     try {
       const bonus = editHasCdiBonus && editCdiBonusPercent ? parseFloat(editCdiBonusPercent.replace(',', '.')) : undefined;
-      await updateYieldRate(selectedInvestment.id, rate, bonus);
+      await updateYieldRate(selectedInvestment.id, rate, bonus, editTaxMode);
       toast({ 
         title: 'Taxa atualizada!',
         description: 'O novo rendimento será aplicado a partir de hoje.'
@@ -349,6 +349,9 @@ export default function InvestmentsPage() {
                           <p className="text-xs text-muted-foreground">
                             Início: {formatDateBR(inv.startDate)} • {inv.yieldRate}% a.a.
                           </p>
+                          <p className="text-xs text-muted-foreground">
+                            Imposto: {inv.taxMode === 'daily' ? 'descontado diariamente' : 'descontado no saque'}
+                          </p>
                         </div>
                         <Button
                           variant="ghost"
@@ -455,6 +458,7 @@ export default function InvestmentsPage() {
                             setEditRate(String(inv.yieldRate));
                             setEditHasCdiBonus(!!inv.cdiBonusPercent);
                             setEditCdiBonusPercent(inv.cdiBonusPercent ? String(inv.cdiBonusPercent) : '');
+                            setEditTaxMode(inv.taxMode ?? 'on_withdrawal');
                             setShowEditRateSheet(true);
                           }}
                         >
@@ -546,6 +550,27 @@ export default function InvestmentsPage() {
                 </p>
               </div>
             )}
+            <div className="space-y-2">
+              <Label>Forma de cobrança do imposto</Label>
+              <RadioGroup
+                value={newTaxMode}
+                onValueChange={(v) => setNewTaxMode(v as 'daily' | 'on_withdrawal')}
+                className="space-y-2"
+              >
+                <div className="flex items-center gap-2">
+                  <RadioGroupItem value="daily" id="new-tax-daily" />
+                  <Label htmlFor="new-tax-daily" className="text-sm cursor-pointer">
+                    Descontar imposto diariamente
+                  </Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <RadioGroupItem value="on_withdrawal" id="new-tax-withdrawal" />
+                  <Label htmlFor="new-tax-withdrawal" className="text-sm cursor-pointer">
+                    Descontar imposto apenas no saque
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
             <p className="text-xs text-muted-foreground">
               Rendimento calculado com base em 252 dias úteis/ano.
               IR pela tabela regressiva, cobrado apenas no resgate.
@@ -628,6 +653,27 @@ export default function InvestmentsPage() {
                 </p>
               </div>
             )}
+            <div className="space-y-2">
+              <Label>Forma de cobrança do imposto</Label>
+              <RadioGroup
+                value={editTaxMode}
+                onValueChange={(v) => setEditTaxMode(v as 'daily' | 'on_withdrawal')}
+                className="space-y-2"
+              >
+                <div className="flex items-center gap-2">
+                  <RadioGroupItem value="daily" id="edit-tax-daily" />
+                  <Label htmlFor="edit-tax-daily" className="text-sm cursor-pointer">
+                    Descontar imposto diariamente
+                  </Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <RadioGroupItem value="on_withdrawal" id="edit-tax-withdrawal" />
+                  <Label htmlFor="edit-tax-withdrawal" className="text-sm cursor-pointer">
+                    Descontar imposto apenas no saque
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
             <p className="text-xs text-muted-foreground">
               <strong>Importante:</strong> A nova taxa será aplicada apenas a partir de hoje.
               O histórico de rendimentos passados não será recalculado.

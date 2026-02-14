@@ -193,7 +193,7 @@ export async function updateInvestment(investment: Investment): Promise<void> {
 /**
  * Update investment yield rate (prospective only)
  */
-export async function updateInvestmentYieldRate(id: string, newRate: number, cdiBonusPercent?: number): Promise<void> {
+export async function updateInvestmentYieldRate(id: string, newRate: number, cdiBonusPercent?: number, taxMode?: 'daily' | 'on_withdrawal'): Promise<void> {
   const investment = await getInvestmentById(id);
   if (!investment) return;
 
@@ -208,6 +208,7 @@ export async function updateInvestmentYieldRate(id: string, newRate: number, cdi
 
   investment.yieldRate = newRate;
   investment.cdiBonusPercent = cdiBonusPercent;
+  if (taxMode) investment.taxMode = taxMode;
   investment.yieldRateHistory = investment.yieldRateHistory || [];
   investment.yieldRateHistory.push(rateChange);
 

@@ -14,6 +14,8 @@ interface BalanceCardProps {
   loading?: boolean;
   dailyYield?: number;
   balanceYieldEnabled?: boolean;
+  balanceYieldRate?: number;
+  balanceYieldTaxMode?: 'daily' | 'on_withdrawal';
   onToggleBalanceYield?: () => void;
 }
 
@@ -25,6 +27,8 @@ export function BalanceCard({
   loading,
   dailyYield = 0,
   balanceYieldEnabled = false,
+  balanceYieldRate = 0,
+  balanceYieldTaxMode = 'on_withdrawal',
   onToggleBalanceYield,
 }: BalanceCardProps) {
   const hasFutureExpenses = projectedExpenses > 0;
@@ -79,10 +83,17 @@ export function BalanceCard({
           )}
           
           {/* Show daily yield indicator */}
-          {dailyYield > 0 && balanceYieldEnabled && (
-            <div className="flex items-center justify-center gap-1 mt-1 text-xs text-success">
-              <Sparkles className="h-3 w-3" />
-              <span>Rendimento diário: +{formatCurrency(dailyYield)}</span>
+          {balanceYieldEnabled && (
+            <div className="mt-2 space-y-0.5">
+              {dailyYield > 0 && (
+                <div className="flex items-center justify-center gap-1 text-xs text-success">
+                  <Sparkles className="h-3 w-3" />
+                  <span>Rendimento diário: +{formatCurrency(dailyYield)}</span>
+                </div>
+              )}
+              <p className="text-[10px] text-muted-foreground text-center">
+                Saldo rendendo a {balanceYieldRate}% a.a. • Imposto {balanceYieldTaxMode === 'daily' ? 'descontado diariamente' : 'descontado apenas no saque'}
+              </p>
             </div>
           )}
         </div>

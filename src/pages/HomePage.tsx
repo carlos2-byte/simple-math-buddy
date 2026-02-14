@@ -337,6 +337,8 @@ export default function HomePage() {
           loading={loading}
           dailyYield={balanceData?.dailyYield ?? 0}
           balanceYieldEnabled={settings.balanceYieldEnabled}
+          balanceYieldRate={settings.balanceYieldRate ?? 6.5}
+          balanceYieldTaxMode={settings.balanceYieldTaxMode ?? 'on_withdrawal'}
           onToggleBalanceYield={toggleBalanceYield}
         />
 

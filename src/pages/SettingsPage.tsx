@@ -9,11 +9,14 @@ import {
   Unlock,
   Trash2,
   FolderDown,
+  TrendingUp,
 } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
@@ -236,6 +239,74 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
+          {/* Balance Yield Settings */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                Rendimento do Saldo Principal
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Label>O saldo rende?</Label>
+                <RadioGroup
+                  value={settings.balanceYieldEnabled ? 'yes' : 'no'}
+                  onValueChange={(v) => updateSettings({ balanceYieldEnabled: v === 'yes' })}
+                  className="flex gap-4"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <RadioGroupItem value="yes" id="yield-yes" />
+                    <Label htmlFor="yield-yes" className="text-sm cursor-pointer">Sim</Label>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <RadioGroupItem value="no" id="yield-no" />
+                    <Label htmlFor="yield-no" className="text-sm cursor-pointer">Não</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+
+              {settings.balanceYieldEnabled && (
+                <>
+                  <div className="space-y-2">
+                    <Label>Taxa de rendimento (% ao ano)</Label>
+                    <Input
+                      type="text"
+                      inputMode="decimal"
+                      value={settings.balanceYieldRate ?? ''}
+                      onChange={e => {
+                        const val = parseFloat(e.target.value.replace(',', '.'));
+                        updateSettings({ balanceYieldRate: isNaN(val) ? 0 : val });
+                      }}
+                      placeholder="Ex: 10"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Imposto é retirado diariamente?</Label>
+                    <RadioGroup
+                      value={settings.balanceYieldTaxMode ?? 'on_withdrawal'}
+                      onValueChange={(v) => updateSettings({ balanceYieldTaxMode: v as 'daily' | 'on_withdrawal' })}
+                      className="space-y-2"
+                    >
+                      <div className="flex items-center gap-2">
+                        <RadioGroupItem value="daily" id="tax-daily" />
+                        <Label htmlFor="tax-daily" className="text-sm cursor-pointer">
+                          Sim, descontar diariamente
+                        </Label>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <RadioGroupItem value="on_withdrawal" id="tax-withdrawal" />
+                        <Label htmlFor="tax-withdrawal" className="text-sm cursor-pointer">
+                          Não, descontar apenas no saque
+                        </Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Data Management */}
           <Card>

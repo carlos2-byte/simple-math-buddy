@@ -51,6 +51,8 @@ export interface AppSettings {
   currencySymbol: string;
   locale?: string;
   balanceYieldEnabled?: boolean;
+  balanceYieldRate?: number; // % a.a.
+  balanceYieldTaxMode?: 'daily' | 'on_withdrawal';
 }
 
 const TRANSACTIONS_KEY = 'transactions';

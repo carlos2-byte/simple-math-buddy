@@ -84,8 +84,8 @@ export function useInvestments() {
     setDefaultRate(rate);
   }, []);
 
-  const updateYieldRate = useCallback(async (id: string, newRate: number, cdiBonusPercent?: number) => {
-    await updateInvestmentYieldRate(id, newRate, cdiBonusPercent);
+  const updateYieldRate = useCallback(async (id: string, newRate: number, cdiBonusPercent?: number, taxMode?: 'daily' | 'on_withdrawal') => {
+    await updateInvestmentYieldRate(id, newRate, cdiBonusPercent, taxMode);
     await loadInvestments();
   }, [loadInvestments]);
 
