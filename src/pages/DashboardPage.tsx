@@ -10,10 +10,12 @@ import { TrendingUp, TrendingDown, PiggyBank, Shield, Share2 } from 'lucide-reac
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { calculateFutureCoverableExpenses } from '@/lib/investCoverage';
 import { ShareSummarySheet } from '@/components/dashboard/ShareSummarySheet';
+import { useInvestments } from '@/hooks/useInvestments';
 
 export default function DashboardPage() {
   const [month, setMonth] = useState(getCurrentMonth());
   const { items, totals, balanceData, loading } = useStatement(month);
+  const { totalInvested } = useInvestments();
   const [futureCoverage, setFutureCoverage] = useState<{ total: number; items: Array<{ date: string; description: string; amount: number }> }>({ total: 0, items: [] });
   const [showShare, setShowShare] = useState(false);
 
@@ -247,6 +249,8 @@ export default function DashboardPage() {
         currentBalance={currentBalance}
         futureCoverage={futureCoverage.total}
         categoryData={categoryData}
+        totalInvested={totalInvested}
+        statementItems={items}
       />
     </PageContainer>
   );
