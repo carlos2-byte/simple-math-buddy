@@ -424,7 +424,7 @@ export default function SettingsPage() {
 
           {/* App Info */}
           <div className="text-center text-sm text-muted-foreground pt-4">
-            <p>FinançasPRO v1.0.8</p>
+            <p>Controle de Finanças 2.0.0</p>
             <p>Seus dados ficam salvos localmente no dispositivo</p>
           </div>
         </div>
