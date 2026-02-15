@@ -182,7 +182,7 @@ export const FinancialSummaryPage = forwardRef<HTMLDivElement, FinancialSummaryP
         {/* Footer */}
         <div style={{ textAlign: 'center', paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
           <p style={{ fontSize: 9, color: '#475569', margin: 0 }}>
-            FinançasPRO v2.0.0 • Gerado em {new Date().toLocaleDateString('pt-BR')}
+            Controle de Finanças 2.0.0 • Gerado em {new Date().toLocaleDateString('pt-BR')}
           </p>
         </div>
       </div>
@@ -348,7 +348,7 @@ export const FinancialDetailsPage = forwardRef<HTMLDivElement, FinancialSummaryP
         {/* Footer */}
         <div style={{ textAlign: 'center', paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
           <p style={{ fontSize: 9, color: '#475569', margin: 0 }}>
-            FinançasPRO v2.0.0 • Gerado em {new Date().toLocaleDateString('pt-BR')}
+            Controle de Finanças 2.0.0 • Gerado em {new Date().toLocaleDateString('pt-BR')}
           </p>
         </div>
       </div>
