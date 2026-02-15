@@ -13,6 +13,9 @@ import { FinancialSummaryPage, FinancialDetailsPage } from './FinancialSummaryPD
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { StatementItem } from '@/hooks/useStatement';
+import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 
 interface CategoryItem {
   id: string;
@@ -64,6 +67,52 @@ export function ShareSummarySheet({
     return html2canvas(el, canvasOpts);
   }, []);
 
+  const isNative = Capacitor.isNativePlatform();
+
+  /** Convert canvas to base64 PNG (without data: prefix) */
+  const canvasToBase64 = (canvas: HTMLCanvasElement): string => {
+    return canvas.toDataURL('image/png').split(',')[1];
+  };
+
+  /** Merge summary + details canvases vertically */
+  const mergeCanvases = (summaryCanvas: HTMLCanvasElement, detailsCanvas: HTMLCanvasElement | null): HTMLCanvasElement => {
+    const gap = 20;
+    const totalHeight = summaryCanvas.height + (detailsCanvas ? gap + detailsCanvas.height : 0);
+    const mergedCanvas = document.createElement('canvas');
+    mergedCanvas.width = summaryCanvas.width;
+    mergedCanvas.height = totalHeight;
+    const ctx = mergedCanvas.getContext('2d');
+    if (ctx) {
+      ctx.fillStyle = '#0f1729';
+      ctx.fillRect(0, 0, mergedCanvas.width, mergedCanvas.height);
+      ctx.drawImage(summaryCanvas, 0, 0);
+      if (detailsCanvas) {
+        ctx.drawImage(detailsCanvas, 0, summaryCanvas.height + gap);
+      }
+    }
+    return mergedCanvas;
+  };
+
+  /** Save base64 to native filesystem and return URI */
+  const saveToNativeFs = async (base64Data: string, filename: string): Promise<string> => {
+    const result = await Filesystem.writeFile({
+      path: filename,
+      data: base64Data,
+      directory: Directory.Cache,
+      recursive: true,
+    });
+    return result.uri;
+  };
+
+  /** Native share using @capacitor/share */
+  const nativeShare = async (fileUri: string, title: string) => {
+    await Share.share({
+      title,
+      url: fileUri,
+      dialogTitle: 'Compartilhar Resumo',
+    });
+  };
+
   const handleDownloadPDF = async () => {
     setGenerating('pdf');
     try {
@@ -88,7 +137,7 @@ export function ShareSummarySheet({
       // Page 2+: Details
       if (detailsCanvas) {
         const detHeight = (detailsCanvas.height * imgWidth) / detailsCanvas.width;
-        const maxContentHeight = pageHeight - 20; // margins
+        const maxContentHeight = pageHeight - 20;
         let remainingHeight = detHeight;
         let sourceY = 0;
 
@@ -100,7 +149,6 @@ export function ShareSummarySheet({
           const sliceHeight = Math.min(remainingHeight, maxContentHeight);
           const sourceSliceHeight = (sliceHeight / detHeight) * detailsCanvas.height;
 
-          // Create a slice canvas
           const sliceCanvas = document.createElement('canvas');
           sliceCanvas.width = detailsCanvas.width;
           sliceCanvas.height = sourceSliceHeight;
@@ -115,8 +163,19 @@ export function ShareSummarySheet({
         }
       }
 
-      pdf.save(`resumo-financeiro-${month}.pdf`);
-      toast({ title: 'PDF salvo com sucesso!' });
+      const pdfFilename = `resumo-financeiro-${month}.pdf`;
+
+      if (isNative) {
+        // Native: save to filesystem then share
+        const pdfBase64 = pdf.output('datauristring').split(',')[1];
+        const uri = await saveToNativeFs(pdfBase64, pdfFilename);
+        await nativeShare(uri, 'Resumo Financeiro PDF');
+        toast({ title: 'PDF compartilhado com sucesso!' });
+      } else {
+        // Web: download normally
+        pdf.save(pdfFilename);
+        toast({ title: 'PDF salvo com sucesso!' });
+      }
     } catch {
       toast({ title: 'Erro ao gerar PDF', variant: 'destructive' });
     } finally {
@@ -133,28 +192,21 @@ export function ShareSummarySheet({
       ]);
       if (!summaryCanvas) return;
 
-      // Merge both canvases vertically
-      const gap = 20;
-      const totalHeight = summaryCanvas.height + (detailsCanvas ? gap + detailsCanvas.height : 0);
-      const mergedCanvas = document.createElement('canvas');
-      mergedCanvas.width = summaryCanvas.width;
-      mergedCanvas.height = totalHeight;
-      const ctx = mergedCanvas.getContext('2d');
-      if (ctx) {
-        ctx.fillStyle = '#0f1729';
-        ctx.fillRect(0, 0, mergedCanvas.width, mergedCanvas.height);
-        ctx.drawImage(summaryCanvas, 0, 0);
-        if (detailsCanvas) {
-          ctx.drawImage(detailsCanvas, 0, summaryCanvas.height + gap);
-        }
+      const mergedCanvas = mergeCanvases(summaryCanvas, detailsCanvas);
+      const imgFilename = `resumo-financeiro-${month}.png`;
+
+      if (isNative) {
+        const base64 = canvasToBase64(mergedCanvas);
+        const uri = await saveToNativeFs(base64, imgFilename);
+        await nativeShare(uri, 'Resumo Financeiro Imagem');
+        toast({ title: 'Imagem compartilhada com sucesso!' });
+      } else {
+        const link = document.createElement('a');
+        link.download = imgFilename;
+        link.href = mergedCanvas.toDataURL('image/png');
+        link.click();
+        toast({ title: 'Imagem salva com sucesso!' });
       }
-
-      const link = document.createElement('a');
-      link.download = `resumo-financeiro-${month}.png`;
-      link.href = mergedCanvas.toDataURL('image/png');
-      link.click();
-
-      toast({ title: 'Imagem salva com sucesso!' });
     } catch {
       toast({ title: 'Erro ao gerar imagem', variant: 'destructive' });
     } finally {
@@ -171,30 +223,26 @@ export function ShareSummarySheet({
       ]);
       if (!summaryCanvas) return;
 
-      const gap = 20;
-      const totalHeight = summaryCanvas.height + (detailsCanvas ? gap + detailsCanvas.height : 0);
-      const mergedCanvas = document.createElement('canvas');
-      mergedCanvas.width = summaryCanvas.width;
-      mergedCanvas.height = totalHeight;
-      const ctx = mergedCanvas.getContext('2d');
-      if (ctx) {
-        ctx.fillStyle = '#0f1729';
-        ctx.fillRect(0, 0, mergedCanvas.width, mergedCanvas.height);
-        ctx.drawImage(summaryCanvas, 0, 0);
-        if (detailsCanvas) {
-          ctx.drawImage(detailsCanvas, 0, summaryCanvas.height + gap);
-        }
-      }
+      const mergedCanvas = mergeCanvases(summaryCanvas, detailsCanvas);
+      const imgFilename = `resumo-financeiro-${month}.png`;
 
-      const blob = await new Promise<Blob | null>((resolve) =>
-        mergedCanvas.toBlob(resolve, 'image/png')
-      );
-
-      if (blob && navigator.share) {
-        const file = new File([blob], `resumo-financeiro-${month}.png`, { type: 'image/png' });
-        await navigator.share({ title: 'Resumo Financeiro', files: [file] });
+      if (isNative) {
+        // Native: save file then share via native share sheet (WhatsApp, etc.)
+        const base64 = canvasToBase64(mergedCanvas);
+        const uri = await saveToNativeFs(base64, imgFilename);
+        await nativeShare(uri, 'Resumo Financeiro');
       } else {
-        handleDownloadImage();
+        // Web: use Web Share API or fallback to download
+        const blob = await new Promise<Blob | null>((resolve) =>
+          mergedCanvas.toBlob(resolve, 'image/png')
+        );
+
+        if (blob && navigator.share) {
+          const file = new File([blob], imgFilename, { type: 'image/png' });
+          await navigator.share({ title: 'Resumo Financeiro', files: [file] });
+        } else {
+          handleDownloadImage();
+        }
       }
     } catch (err: any) {
       if (err?.name !== 'AbortError') {
