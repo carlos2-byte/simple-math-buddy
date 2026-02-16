@@ -17,7 +17,8 @@ import com.google.android.gms.ads.AdView;
 public class MainActivity extends BridgeActivity {
 
     private static final String TAG = "MainActivity";
-    private static final String BANNER_AD_UNIT_ID = "ca-app-pub-2671131515539767/2926247201";
+    // TODO: Reverter para produção: ca-app-pub-2671131515539767/2926247201
+    private static final String BANNER_AD_UNIT_ID = "ca-app-pub-3940256099942544/6300978111";
     private AdView adView;
 
     @Override

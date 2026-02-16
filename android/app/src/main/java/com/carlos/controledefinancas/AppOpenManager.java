@@ -28,7 +28,8 @@ import com.google.android.gms.ads.appopen.AppOpenAd;
 public class AppOpenManager implements Application.ActivityLifecycleCallbacks, DefaultLifecycleObserver {
 
     private static final String TAG = "AppOpenManager";
-    private static final String AD_UNIT_ID = "ca-app-pub-2671131515539767/9244243541";
+    // TODO: Reverter para produção: ca-app-pub-2671131515539767/9244243541
+    private static final String AD_UNIT_ID = "ca-app-pub-3940256099942544/9257395921";
     private static final long MIN_INTERVAL_MS = 8 * 60 * 1000; // 8 minutes
 
     private final Application application;
