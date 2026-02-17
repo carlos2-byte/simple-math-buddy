@@ -43,16 +43,18 @@ function AppContent() {
   const startAds = useCallback(async () => {
     if (adInitialized.current) return;
     adInitialized.current = true;
+    console.log('[App] 🚀 Splash finalizado, app pronto — iniciando AdMob');
 
     await initializeAdMob();
-    await showInterstitial(); // 1º interstitial na abertura
-    await showBanner();       // banner fixo no bottom
+    await showInterstitial();
+    await showBanner();
   }, []);
 
   // AdMob: detectar minimizar/reabrir → resetar timer + mostrar interstitial
   useEffect(() => {
     const handleVisibility = async () => {
       if (document.visibilityState === 'visible' && adInitialized.current) {
+        console.log('[App] 👁️ App voltou do background, checando interstitial');
         resetAdTimer();
         await showInterstitial();
       }
