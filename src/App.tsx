@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,6 +11,7 @@ import { SetupScreen, APP_CONFIGURED_KEY } from "@/components/setup/SetupScreen"
 
 import { useAppLock } from "@/hooks/useAppLock";
 import { defaultAdapter } from "@/lib/storageAdapter";
+import { initializeAdMob, showBanner, showInterstitial, resetAdTimer } from "@/lib/admob";
 import HomePage from "./pages/HomePage";
 import DashboardPage from "./pages/DashboardPage";
 import CardsPage from "./pages/CardsPage";
@@ -32,9 +33,32 @@ function AppContent() {
   const [unlocked, setUnlocked] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
   const [appConfigured, setAppConfigured] = useState<boolean | null>(null);
+  const adInitialized = useRef(false);
 
   useEffect(() => {
     checkConfigured();
+  }, []);
+
+  // AdMob: inicializar + interstitial na abertura + banner
+  const startAds = useCallback(async () => {
+    if (adInitialized.current) return;
+    adInitialized.current = true;
+
+    await initializeAdMob();
+    await showInterstitial(); // 1º interstitial na abertura
+    await showBanner();       // banner fixo no bottom
+  }, []);
+
+  // AdMob: detectar minimizar/reabrir → resetar timer + mostrar interstitial
+  useEffect(() => {
+    const handleVisibility = async () => {
+      if (document.visibilityState === 'visible' && adInitialized.current) {
+        resetAdTimer();
+        await showInterstitial();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
   }, []);
 
   const checkConfigured = async () => {
@@ -43,7 +67,7 @@ function AppContent() {
   };
 
   if (showSplash) {
-    return <SplashScreen onComplete={() => setShowSplash(false)} />;
+    return <SplashScreen onComplete={() => { setShowSplash(false); startAds(); }} />;
   }
 
   // Still checking config
