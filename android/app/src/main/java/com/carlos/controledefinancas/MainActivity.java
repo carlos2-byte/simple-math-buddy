@@ -15,13 +15,8 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Força fundo preto para evitar flash branco
+        // Fundo preto apenas na janela (não na WebView, para não cobrir banner/splash)
         getWindow().getDecorView().setBackgroundColor(Color.BLACK);
-
-        if (getBridge() != null && getBridge().getWebView() != null) {
-            getBridge().getWebView().setBackgroundColor(Color.BLACK);
-            getBridge().getWebView().setOverScrollMode(View.OVER_SCROLL_NEVER);
-        }
 
         // Splash video — exibido apenas na abertura
         showSplashVideo();
