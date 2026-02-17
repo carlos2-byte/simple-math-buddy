@@ -15,14 +15,16 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Fundo preto apenas na janela (não na WebView, para não cobrir banner/splash)
+        // Fundo preto na janela para evitar flash branco
         getWindow().getDecorView().setBackgroundColor(Color.BLACK);
+
+        // Esconder a WebView do Capacitor durante o splash
+        if (getBridge() != null && getBridge().getWebView() != null) {
+            getBridge().getWebView().setVisibility(View.INVISIBLE);
+        }
 
         // Splash video — exibido apenas na abertura
         showSplashVideo();
-
-        // Banner e Interstitial são gerenciados pelo plugin
-        // @capacitor-community/admob via JavaScript (src/lib/admob.ts)
     }
 
     private void showSplashVideo() {
@@ -43,18 +45,32 @@ public class MainActivity extends BridgeActivity {
             videoView.setOnCompletionListener(mp -> {
                 android.util.Log.d("MainActivity", "Splash video: finalizado");
                 rootView.removeView(videoView);
+                // Mostrar WebView somente após o vídeo terminar
+                if (getBridge() != null && getBridge().getWebView() != null) {
+                    getBridge().getWebView().setVisibility(View.VISIBLE);
+                }
             });
 
             videoView.setOnErrorListener((mp, what, extra) -> {
                 android.util.Log.e("MainActivity", "Splash video: erro " + what);
                 rootView.removeView(videoView);
+                // Em caso de erro, mostrar WebView imediatamente
+                if (getBridge() != null && getBridge().getWebView() != null) {
+                    getBridge().getWebView().setVisibility(View.VISIBLE);
+                }
                 return true;
             });
 
+            // Adicionar VideoView por cima de tudo
             rootView.addView(videoView);
+            videoView.bringToFront();
             videoView.start();
         } catch (Exception e) {
             android.util.Log.w("MainActivity", "Splash video not found, skipping: " + e.getMessage());
+            // Sem vídeo, mostrar WebView direto
+            if (getBridge() != null && getBridge().getWebView() != null) {
+                getBridge().getWebView().setVisibility(View.VISIBLE);
+            }
         }
     }
 }
