@@ -27,6 +27,7 @@ public class MainActivity extends BridgeActivity {
 
     private void showSplashVideo() {
         try {
+            android.util.Log.d("MainActivity", "Splash video: iniciando");
             FrameLayout rootView = (FrameLayout) getWindow().getDecorView().findViewById(android.R.id.content);
 
             VideoView videoView = new VideoView(this);
@@ -40,10 +41,12 @@ public class MainActivity extends BridgeActivity {
             videoView.setVideoURI(videoUri);
 
             videoView.setOnCompletionListener(mp -> {
+                android.util.Log.d("MainActivity", "Splash video: finalizado");
                 rootView.removeView(videoView);
             });
 
             videoView.setOnErrorListener((mp, what, extra) -> {
+                android.util.Log.e("MainActivity", "Splash video: erro " + what);
                 rootView.removeView(videoView);
                 return true;
             });
@@ -51,7 +54,6 @@ public class MainActivity extends BridgeActivity {
             rootView.addView(videoView);
             videoView.start();
         } catch (Exception e) {
-            // splash_video.mp4 não encontrado em res/raw — segue sem vídeo
             android.util.Log.w("MainActivity", "Splash video not found, skipping: " + e.getMessage());
         }
     }

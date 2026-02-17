@@ -1,14 +1,14 @@
 import { Capacitor } from '@capacitor/core';
+import { toast } from 'sonner';
 
 // ─── Ad Unit IDs ────────────────────────────────────────────
 const BANNER_ID = 'ca-app-pub-2671131515539767/2926247201';
 const INTERSTITIAL_ID = 'ca-app-pub-2671131515539767/9244243541';
 
-// IDs de teste do Google (ativar isDebug = true para usar)
 const TEST_BANNER_ID = 'ca-app-pub-3940256099942544/6300978111';
 const TEST_INTERSTITIAL_ID = 'ca-app-pub-3940256099942544/1033173712';
 
-const isDebug = false; // ← Altere para true para testes
+const isDebug = false; // ← true para testes
 
 // ─── Timing ─────────────────────────────────────────────────
 const MIN_INTERVAL_MS = 8 * 60 * 1000; // 8 minutos
@@ -31,10 +31,6 @@ function getIds() {
   };
 }
 
-/**
- * Inicializa o SDK do AdMob.
- * Seguro para chamar no web — retorna silenciosamente.
- */
 export async function initializeAdMob(): Promise<void> {
   if (!Capacitor.isNativePlatform() || initialized) return;
 
@@ -46,16 +42,14 @@ export async function initializeAdMob(): Promise<void> {
 
     await AdMob.initialize({ initializeForTesting: isDebug });
     initialized = true;
-    console.log('[AdMob] SDK initialized');
+    console.log('[AdMob] ✅ SDK initialized');
+    toast.success('AdMob: inicializado com sucesso', { duration: 3000 });
   } catch (e) {
-    console.error('[AdMob] Init error:', e);
+    console.error('[AdMob] ❌ Init error:', e);
+    toast.error('AdMob: erro na inicialização');
   }
 }
 
-/**
- * Exibe banner adaptável fixo na parte inferior.
- * Chamado uma única vez — permanece visível.
- */
 export async function showBanner(): Promise<void> {
   if (!AdMob || bannerShown) return;
 
@@ -68,18 +62,14 @@ export async function showBanner(): Promise<void> {
       isTesting: isDebug,
     });
     bannerShown = true;
-    console.log('[AdMob] Banner shown');
+    console.log('[AdMob] ✅ Banner exibido (BOTTOM_CENTER)');
+    toast.success('Banner: exibido na parte inferior', { duration: 3000 });
   } catch (e) {
-    console.error('[AdMob] Banner error:', e);
+    console.error('[AdMob] ❌ Banner error:', e);
+    toast.error('Banner: erro ao exibir');
   }
 }
 
-/**
- * Mostra interstitial respeitando as regras:
- * - 1ª vez: mostra imediatamente
- * - Subsequentes: somente após 8 min desde o último
- * - Nunca dois seguidos
- */
 export async function showInterstitial(): Promise<boolean> {
   if (!AdMob || isShowingAd) return false;
 
@@ -92,7 +82,8 @@ export async function showInterstitial(): Promise<boolean> {
     return doShowInterstitial();
   }
 
-  console.log(`[AdMob] Interstitial skipped — ${Math.round((MIN_INTERVAL_MS - elapsed) / 1000)}s remaining`);
+  const remaining = Math.round((MIN_INTERVAL_MS - elapsed) / 1000);
+  console.log(`[AdMob] ⏳ Interstitial skipped — ${remaining}s remaining`);
   return false;
 }
 
@@ -101,27 +92,29 @@ async function doShowInterstitial(): Promise<boolean> {
     isShowingAd = true;
     const ids = getIds();
 
+    console.log('[AdMob] 📦 Interstitial: carregando...');
     await AdMob.prepareInterstitial({
       adId: ids.interstitial,
       isTesting: isDebug,
     });
-    await AdMob.showInterstitial();
+    console.log('[AdMob] ✅ Interstitial: carregado');
 
+    await AdMob.showInterstitial();
     hasShownFirstAd = true;
     lastAdShownTime = Date.now();
     isShowingAd = false;
-    console.log('[AdMob] Interstitial shown');
+    console.log('[AdMob] ✅ Interstitial: exibido');
+    toast.success('Interstitial: exibido', { duration: 3000 });
     return true;
   } catch (e) {
     isShowingAd = false;
-    console.error('[AdMob] Interstitial error:', e);
+    console.error('[AdMob] ❌ Interstitial error:', e);
+    toast.error('Interstitial: erro ao exibir');
     return false;
   }
 }
 
-/**
- * Reseta o timer de 8 minutos (chamar ao reabrir o app).
- */
 export function resetAdTimer(): void {
   lastAdShownTime = 0;
+  console.log('[AdMob] 🔄 Timer resetado');
 }
