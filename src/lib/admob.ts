@@ -1,5 +1,5 @@
 import { Capacitor } from '@capacitor/core';
-import { toast } from 'sonner';
+
 
 // ─── Ad Unit IDs ────────────────────────────────────────────
 const BANNER_ID = 'ca-app-pub-2671131515539767/2926247201';
@@ -42,11 +42,8 @@ export async function initializeAdMob(): Promise<void> {
 
     await AdMob.initialize({ initializeForTesting: isDebug });
     initialized = true;
-    console.log('[AdMob] ✅ SDK initialized');
-    toast.success('AdMob: inicializado com sucesso', { duration: 3000 });
   } catch (e) {
-    console.error('[AdMob] ❌ Init error:', e);
-    toast.error('AdMob: erro na inicialização');
+    // silently fail
   }
 }
 
@@ -62,11 +59,8 @@ export async function showBanner(): Promise<void> {
       isTesting: isDebug,
     });
     bannerShown = true;
-    console.log('[AdMob] ✅ Banner exibido (BOTTOM_CENTER)');
-    toast.success('Banner: exibido na parte inferior', { duration: 3000 });
   } catch (e) {
-    console.error('[AdMob] ❌ Banner error:', e);
-    toast.error('Banner: erro ao exibir');
+    // silently fail
   }
 }
 
@@ -82,8 +76,7 @@ export async function showInterstitial(): Promise<boolean> {
     return doShowInterstitial();
   }
 
-  const remaining = Math.round((MIN_INTERVAL_MS - elapsed) / 1000);
-  console.log(`[AdMob] ⏳ Interstitial skipped — ${remaining}s remaining`);
+  // skipped — interval not reached
   return false;
 }
 
@@ -92,29 +85,23 @@ async function doShowInterstitial(): Promise<boolean> {
     isShowingAd = true;
     const ids = getIds();
 
-    console.log('[AdMob] 📦 Interstitial: carregando...');
     await AdMob.prepareInterstitial({
       adId: ids.interstitial,
       isTesting: isDebug,
     });
-    console.log('[AdMob] ✅ Interstitial: carregado');
 
     await AdMob.showInterstitial();
     hasShownFirstAd = true;
     lastAdShownTime = Date.now();
     isShowingAd = false;
-    console.log('[AdMob] ✅ Interstitial: exibido');
-    toast.success('Interstitial: exibido', { duration: 3000 });
     return true;
   } catch (e) {
     isShowingAd = false;
-    console.error('[AdMob] ❌ Interstitial error:', e);
-    toast.error('Interstitial: erro ao exibir');
+    // silently fail
     return false;
   }
 }
 
 export function resetAdTimer(): void {
   lastAdShownTime = 0;
-  console.log('[AdMob] 🔄 Timer resetado');
 }
