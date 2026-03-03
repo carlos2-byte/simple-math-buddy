@@ -26,9 +26,9 @@ public class MainActivity extends BridgeActivity {
 
     private static final String TAG = "AdMob";
     
-        private static final String BANNER_ID = "ca-app-pub-3940256099942544/6300978111";
-        private static final String APP_OPEN_ID = "ca-app-pub-3940256099942544/9257395921";
-        private static final String INTERSTITIAL_ID = "ca-app-pub-3940256099942544/1033173712";
+        private static final String BANNER_ID = "ca-app-pub-2671131515539767/2926247201";
+        private static final String APP_OPEN_ID = "ca-app-pub-2671131515539767/9244243541";
+        private static final String INTERSTITIAL_ID = "ca-app-pub-2671131515539767/8950902951";
         // Banner (Teste)
         //private static final String BANNER_ID = "ca-app-pub-3940256099942544/6300978111";
 
