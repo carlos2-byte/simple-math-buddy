@@ -21,14 +21,12 @@ interface AddSalaryAccountSheetProps {
 
 export function AddSalaryAccountSheet({ open, onOpenChange, onSubmit }: AddSalaryAccountSheetProps) {
   const [name, setName] = useState('');
-  const [balance, setBalance] = useState('');
   const [payDay, setPayDay] = useState('5');
   const [canReceiveTransfers, setCanReceiveTransfers] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const resetForm = () => {
     setName('');
-    setBalance('');
     setPayDay('5');
     setCanReceiveTransfers(true);
   };
@@ -41,7 +39,6 @@ export function AddSalaryAccountSheet({ open, onOpenChange, onSubmit }: AddSalar
     try {
       await onSubmit({
         name: name.trim(),
-        balance: balance ? parseFloat(balance.replace(',', '.')) : 0,
         payDay: parseInt(payDay),
         canReceiveTransfers,
       });
@@ -74,22 +71,6 @@ export function AddSalaryAccountSheet({ open, onOpenChange, onSubmit }: AddSalar
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="balance">Saldo Inicial</Label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">R$</span>
-              <Input
-                id="balance"
-                type="text"
-                inputMode="decimal"
-                value={balance}
-                onChange={e => setBalance(e.target.value)}
-                placeholder="0,00"
-                className="pl-10"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
             <Label>Dia do Pagamento</Label>
             <Select value={payDay} onValueChange={setPayDay}>
               <SelectTrigger><SelectValue /></SelectTrigger>
@@ -107,6 +88,12 @@ export function AddSalaryAccountSheet({ open, onOpenChange, onSubmit }: AddSalar
               </p>
             </div>
             <Switch checked={canReceiveTransfers} onCheckedChange={setCanReceiveTransfers} />
+          </div>
+
+          <div className="p-3 border rounded-lg bg-muted/10">
+            <p className="text-xs text-muted-foreground">
+              💡 Para adicionar saldo, lance uma receita na Home vinculada a esta conta.
+            </p>
           </div>
 
           <Button type="submit" className="w-full" disabled={isSubmitting}>

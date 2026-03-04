@@ -8,19 +8,30 @@ import {
   deleteSalaryAccount,
   addSalaryIncomeEntry,
   getEntriesByAccount,
+  getAllAccountBalances,
 } from '@/lib/salaryAccounts';
 import { generateId } from '@/lib/formatters';
 import { toast } from 'sonner';
 
+export interface SalaryAccountWithBalance extends SalaryAccount {
+  balance: number;
+}
+
 export function useSalaryAccounts() {
-  const [accounts, setAccounts] = useState<SalaryAccount[]>([]);
+  const [accounts, setAccounts] = useState<SalaryAccountWithBalance[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadAccounts = useCallback(async () => {
     setLoading(true);
     try {
-      const loaded = await getSalaryAccounts();
-      setAccounts(loaded);
+      const [loaded, balances] = await Promise.all([
+        getSalaryAccounts(),
+        getAllAccountBalances(),
+      ]);
+      setAccounts(loaded.map(a => ({
+        ...a,
+        balance: balances.get(a.id) ?? 0,
+      })));
     } finally {
       setLoading(false);
     }

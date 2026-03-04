@@ -3,9 +3,9 @@ import { defaultAdapter } from './storageAdapter';
 export interface SalaryAccount {
   id: string;
   name: string;
-  balance: number;
   payDay: number; // Day of month salary is deposited
   canReceiveTransfers: boolean;
+  // balance is NO LONGER stored - it's calculated dynamically
 }
 
 const SALARY_ACCOUNTS_KEY = 'salary_accounts';
@@ -23,7 +23,9 @@ export interface SalaryIncomeEntry {
 
 // CRUD for salary accounts
 export async function getSalaryAccounts(): Promise<SalaryAccount[]> {
-  return (await defaultAdapter.getItem<SalaryAccount[]>(SALARY_ACCOUNTS_KEY, [])) ?? [];
+  const raw = (await defaultAdapter.getItem<any[]>(SALARY_ACCOUNTS_KEY, [])) ?? [];
+  // Strip legacy balance field if present
+  return raw.map(({ balance, ...rest }) => rest as SalaryAccount);
 }
 
 export async function getSalaryAccountById(id: string): Promise<SalaryAccount | undefined> {
@@ -71,8 +73,29 @@ export async function getSalaryIncomeEntries(): Promise<SalaryIncomeEntry[]> {
 }
 
 /**
+ * Calculate account balance dynamically from all income entries.
+ */
+export async function getAccountBalance(accountId: string): Promise<number> {
+  const entries = await getSalaryIncomeEntries();
+  return entries
+    .filter(e => e.accountId === accountId)
+    .reduce((sum, e) => sum + e.amount, 0);
+}
+
+/**
+ * Get balances for all accounts at once (efficient batch).
+ */
+export async function getAllAccountBalances(): Promise<Map<string, number>> {
+  const entries = await getSalaryIncomeEntries();
+  const balances = new Map<string, number>();
+  for (const e of entries) {
+    balances.set(e.accountId, (balances.get(e.accountId) ?? 0) + e.amount);
+  }
+  return balances;
+}
+
+/**
  * Add income entry. Automatically consolidates (marks as immutable) after saving.
- * Validates that balance won't go negative.
  */
 export async function addSalaryIncomeEntry(entry: SalaryIncomeEntry): Promise<{ success: boolean; error?: string }> {
   if (entry.amount <= 0) {
@@ -80,17 +103,9 @@ export async function addSalaryIncomeEntry(entry: SalaryIncomeEntry): Promise<{ 
   }
 
   const entries = await getSalaryIncomeEntries();
-  // Mark as consolidated immediately - history is immutable
   entry.consolidated = true;
   entries.push(entry);
   await defaultAdapter.setItem(SALARY_INCOME_KEY, entries);
-  
-  // Update account balance
-  const account = await getSalaryAccountById(entry.accountId);
-  if (account) {
-    account.balance += entry.amount;
-    await updateSalaryAccount(account);
-  }
   return { success: true };
 }
 
@@ -124,31 +139,11 @@ export async function getEntriesByAccount(accountId: string): Promise<SalaryInco
 }
 
 /**
- * Deduct amount from a salary account balance.
- * Validates that balance won't go negative.
- */
-export async function deductFromAccount(
-  accountId: string, 
-  amount: number
-): Promise<{ success: boolean; error?: string }> {
-  const account = await getSalaryAccountById(accountId);
-  if (!account) return { success: false, error: 'Conta não encontrada.' };
-  
-  if (account.balance < amount) {
-    return { success: false, error: `Saldo insuficiente na conta "${account.name}". Disponível: ${account.balance.toFixed(2)}` };
-  }
-
-  account.balance -= amount;
-  await updateSalaryAccount(account);
-  return { success: true };
-}
-
-/**
  * Optimize payments: determine the best way to pay expenses using salary accounts.
  * 
  * Priority:
  * 1. Linked (mandatory) account - if it has sufficient balance
- * 2. Single account with highest balance that can cover the full amount
+ * 2. Single account with highest balance that covers the full amount
  * 3. Combination with fewest accounts needed
  * 
  * Does NOT execute any transfers - only suggests the optimal payment plan.
@@ -159,10 +154,13 @@ export async function optimizePayments(
   const accounts = await getSalaryAccounts();
   if (accounts.length === 0) return [];
 
+  // Calculate dynamic balances
+  const dynamicBalances = await getAllAccountBalances();
+
   const result: Array<{ expenseId: string; accountId: string; accountName: string; amount: number }> = [];
   
   // Track remaining balance per account
-  const balances = new Map(accounts.map(a => [a.id, a.balance]));
+  const balances = new Map(accounts.map(a => [a.id, dynamicBalances.get(a.id) ?? 0]));
 
   for (const exp of expenses) {
     const expAmount = Math.abs(exp.amount);
@@ -173,17 +171,14 @@ export async function optimizePayments(
       if (account) {
         const available = balances.get(account.id) ?? 0;
         if (available >= expAmount) {
-          // Linked account covers fully
           result.push({ expenseId: exp.id, accountId: account.id, accountName: account.name, amount: expAmount });
           balances.set(account.id, available - expAmount);
           continue;
         }
-        // Linked account has partial balance - use what it has, then find the rest
         if (available > 0) {
           result.push({ expenseId: exp.id, accountId: account.id, accountName: account.name, amount: available });
           balances.set(account.id, 0);
           const remaining = expAmount - available;
-          // Find another account for the remainder
           const sorted = [...balances.entries()]
             .filter(([id]) => id !== account.id && (balances.get(id) ?? 0) > 0)
             .sort((a, b) => b[1] - a[1]);
@@ -202,12 +197,11 @@ export async function optimizePayments(
       }
     }
 
-    // Priority 2: Single account with highest balance that covers the full amount
+    // Priority 2: Single account with highest balance
     const sorted = [...balances.entries()]
       .filter(([, bal]) => bal > 0)
       .sort((a, b) => b[1] - a[1]);
 
-    // Try to find single account that covers it
     const singleAccount = sorted.find(([, bal]) => bal >= expAmount);
     if (singleAccount) {
       const [accId, accBal] = singleAccount;
@@ -217,7 +211,7 @@ export async function optimizePayments(
       continue;
     }
 
-    // Priority 3: Use fewest accounts (sorted by highest balance first)
+    // Priority 3: Fewest accounts
     let left = expAmount;
     for (const [accId, accBal] of sorted) {
       if (left <= 0) break;

@@ -406,13 +406,12 @@ export function AddTransactionSheet({
               </>
             )}
 
-            {/* Mandatory Salary Account (for expenses) */}
-            {type === 'expense' && (
-              <AccountSelector
-                value={mandatoryAccountId}
-                onChange={setMandatoryAccountId}
-              />
-            )}
+            {/* Mandatory Salary Account (for all transaction types) */}
+            <AccountSelector
+              value={mandatoryAccountId}
+              onChange={setMandatoryAccountId}
+              label={type === 'income' ? 'Vincular à conta salário' : 'Conta obrigatória'}
+            />
 
             {/* Submit Button */}
             <Button type="submit" className="w-full h-12" disabled={isSubmitting}>
