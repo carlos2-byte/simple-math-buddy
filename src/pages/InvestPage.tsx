@@ -531,20 +531,8 @@ export default function InvestmentsPage() {
             </div>
             <div className="space-y-2">
               <Label>Valor Inicial</Label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                  R$
-                </span>
-                <Input
-                  type="text"
-                  inputMode="decimal"
-                  value={newAmount}
-                  onChange={e => setNewAmount(e.target.value)}
-                  placeholder="0,00"
-                  className="pl-10"
-                  required
-                />
-              </div>
+              <CurrencyInput value={newAmount} onChange={setNewAmount} required />
+            </div>
             </div>
             <div className="space-y-2">
               <Label>Taxa de Referência (% a.a.)</Label>
