@@ -533,7 +533,6 @@ export default function InvestmentsPage() {
               <Label>Valor Inicial</Label>
               <CurrencyInput value={newAmount} onChange={setNewAmount} required />
             </div>
-            </div>
             <div className="space-y-2">
               <Label>Taxa de Referência (% a.a.)</Label>
               <Input
