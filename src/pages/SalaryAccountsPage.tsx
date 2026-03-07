@@ -125,7 +125,7 @@ export default function SalaryAccountsPage() {
     <PageContainer
       header={
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-center flex-1">Contas Salário</h1>
+          <h1 className="text-2xl font-bold text-center flex-1">Receitas</h1>
           <Button onClick={() => setShowAddSheet(true)} size="sm">
             <Plus className="h-4 w-4 mr-1" />
             Nova
@@ -152,10 +152,10 @@ export default function SalaryAccountsPage() {
             <Card>
               <CardContent className="py-12 text-center">
                 <Wallet className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground">Nenhuma conta salário cadastrada</p>
+                <p className="text-muted-foreground">Nenhuma fonte de receita cadastrada</p>
                 <Button className="mt-4" onClick={() => setShowAddSheet(true)}>
                   <Plus className="h-4 w-4 mr-1" />
-                  Adicionar Conta
+                  Adicionar Fonte
                 </Button>
               </CardContent>
             </Card>
@@ -250,7 +250,7 @@ export default function SalaryAccountsPage() {
       <AlertDialog open={!!accountToDelete} onOpenChange={(open) => { if (!open) setAccountToDelete(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Excluir conta "{accountToDelete?.name}"?</AlertDialogTitle>
+            <AlertDialogTitle>Excluir fonte "{accountToDelete?.name}"?</AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div className="space-y-3">
                 {deleteHasHistory ? (
@@ -316,7 +316,7 @@ export default function SalaryAccountsPage() {
                           className="mt-1"
                         />
                         <div>
-                          <p className="text-sm font-medium text-destructive">Excluir conta e todo histórico</p>
+                          <p className="text-sm font-medium text-destructive">Excluir fonte e todo histórico</p>
                           <p className="text-xs text-muted-foreground">
                             Todos os lançamentos serão perdidos permanentemente. O saldo será removido.
                           </p>
@@ -325,7 +325,7 @@ export default function SalaryAccountsPage() {
                     </div>
                   </>
                 ) : (
-                  <p>A conta será excluída permanentemente. Esta ação não pode ser desfeita.</p>
+                  <p>A fonte será excluída permanentemente. Esta ação não pode ser desfeita.</p>
                 )}
               </div>
             </AlertDialogDescription>

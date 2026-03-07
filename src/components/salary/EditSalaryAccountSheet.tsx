@@ -70,12 +70,12 @@ export function EditSalaryAccountSheet({ open, onOpenChange, account, onSubmit }
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="bottom" className="h-auto rounded-t-3xl max-h-[90vh] overflow-y-auto">
         <SheetHeader className="mb-6">
-          <SheetTitle>Editar Conta</SheetTitle>
+          <SheetTitle>Editar Fonte de Receita</SheetTitle>
         </SheetHeader>
 
         <form onSubmit={handleSubmit} className="space-y-5 pb-6">
           <div className="space-y-2">
-            <Label htmlFor="editAccountName">Nome da Conta</Label>
+            <Label htmlFor="editAccountName">Nome da Fonte</Label>
             <Input
               id="editAccountName"
               value={name}

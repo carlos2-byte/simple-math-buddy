@@ -15,7 +15,7 @@ interface AccountSelectorProps {
   label?: string;
 }
 
-export function AccountSelector({ value, onChange, label = 'Conta obrigatória' }: AccountSelectorProps) {
+export function AccountSelector({ value, onChange, label = 'Fonte de receita obrigatória' }: AccountSelectorProps) {
   const [accounts, setAccounts] = useState<SalaryAccount[]>([]);
 
   useEffect(() => {
@@ -28,14 +28,14 @@ export function AccountSelector({ value, onChange, label = 'Conta obrigatória' 
     <div className="space-y-2 p-3 border rounded-lg bg-muted/20">
       <Label>{label}</Label>
       <p className="text-xs text-muted-foreground">
-        Selecione a conta que deve pagar esta despesa
+        Selecione a fonte de receita que deve pagar esta despesa
       </p>
       <Select value={value || 'none'} onValueChange={(val) => onChange(val === 'none' ? '' : val)}>
         <SelectTrigger>
-          <SelectValue placeholder="Nenhuma (sem conta obrigatória)" />
+          <SelectValue placeholder="Nenhuma (sem fonte obrigatória)" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="none">Nenhuma (sem conta obrigatória)</SelectItem>
+          <SelectItem value="none">Nenhuma (sem fonte obrigatória)</SelectItem>
           {accounts.map(a => (
             <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
           ))}

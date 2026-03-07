@@ -55,12 +55,12 @@ export function AddSalaryAccountSheet({ open, onOpenChange, onSubmit }: AddSalar
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="bottom" className="h-auto rounded-t-3xl max-h-[90vh] overflow-y-auto">
         <SheetHeader className="mb-6">
-          <SheetTitle>Nova Conta Salário</SheetTitle>
+          <SheetTitle>Nova Fonte de Receita</SheetTitle>
         </SheetHeader>
 
         <form onSubmit={handleSubmit} className="space-y-5 pb-6">
           <div className="space-y-2">
-            <Label htmlFor="accountName">Nome da Conta</Label>
+            <Label htmlFor="accountName">Nome da Fonte</Label>
             <Input
               id="accountName"
               value={name}
@@ -92,12 +92,12 @@ export function AddSalaryAccountSheet({ open, onOpenChange, onSubmit }: AddSalar
 
           <div className="p-3 border rounded-lg bg-muted/10">
             <p className="text-xs text-muted-foreground">
-              💡 Para adicionar saldo, lance uma receita na Home vinculada a esta conta.
+              💡 Para adicionar saldo, lance uma receita vinculada a esta fonte.
             </p>
           </div>
 
           <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? 'Salvando...' : 'Adicionar Conta'}
+            {isSubmitting ? 'Salvando...' : 'Adicionar Fonte'}
           </Button>
         </form>
       </SheetContent>
