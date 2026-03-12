@@ -49,7 +49,7 @@ function CardItem({
             <CardIcon className="h-8 w-8 text-white/80" />
             <div className="text-right">
               <p className="text-xs text-white/70">Fatura {formatMonthYear(getCurrentMonth())}</p>
-              <p className="text-lg font-bold text-white">
+              <p className="text-lg font-bold text-white truncate">
                 {formatCurrency(monthlyTotal)}
               </p>
             </div>
