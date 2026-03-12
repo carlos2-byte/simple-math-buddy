@@ -140,7 +140,7 @@ export default function SalaryAccountsPage() {
             <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
               <CardContent className="py-4">
                 <p className="text-sm text-muted-foreground">Saldo Total</p>
-                <p className="text-2xl font-bold text-primary">{formatCurrency(totalBalance)}</p>
+                <p className="text-2xl font-bold text-primary truncate">{formatCurrency(totalBalance)}</p>
                 <p className="text-xs text-muted-foreground mt-1">
                   Refletido no saldo geral da Home
                 </p>
