@@ -64,7 +64,7 @@ function CardItem({
               <div className="text-right text-xs text-white/70">
                 {card.closingDay && <p>Fecha dia {card.closingDay}</p>}
                 {card.limit && (
-                  <p>Limite: {formatCurrency(availableLimit)} disponível</p>
+                  <p className="truncate">Limite: {formatCurrency(availableLimit)} disponível</p>
                 )}
               </div>
             </div>

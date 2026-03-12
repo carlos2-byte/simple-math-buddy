@@ -274,9 +274,9 @@ export default function InvestmentsPage() {
         {/* Total Card */}
         <Card className="bg-primary/10 border-primary/20">
           <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <TrendingUp className="h-8 w-8 text-primary" />
-              <div>
+            <div className="flex items-center gap-3 min-w-0">
+              <TrendingUp className="h-8 w-8 text-primary shrink-0" />
+              <div className="min-w-0">
                 <p className="text-sm text-muted-foreground">Total Investido</p>
                 <p className="text-2xl font-bold text-primary tabular-nums truncate">
                   {formatCurrency(totalInvested)}

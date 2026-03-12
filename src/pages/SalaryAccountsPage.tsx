@@ -164,8 +164,8 @@ export default function SalaryAccountsPage() {
               {activeAccounts.map(account => (
                 <Card key={account.id} className="overflow-hidden">
                   <CardContent className="py-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <Wallet className="h-5 w-5 text-primary" />
                           <h3 className="font-semibold">{account.name}</h3>
