@@ -16,12 +16,11 @@ export function AppLayout({ children }: AppLayoutProps) {
       {/* 2. Menu de navegação */}
       <BottomNav />
 
-      {/* 3. Espaço reservado para o banner do AdMob */}
-      {/* Altura de segurança para banners adaptativos (60px + margem do sistema) */}
+      {/* 3. Espaço reservado para o banner do AdMob (65px) ABAIXO da navegação */}
       <div 
         className="fixed left-0 right-0 z-40 bg-transparent pointer-events-none"
         style={{ 
-          bottom: 'calc(64px + env(safe-area-inset-bottom, 0px))',
+          bottom: '0px',
           height: '65px' 
         }}
         aria-hidden="true"
